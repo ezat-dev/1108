@@ -145,7 +145,6 @@
 </head>
 
 <body data-offset="60" data-target=".navbar">
-
     <div id="menu_bar">
         <jsp:include page="../include/AheaderPopup.jsp"/>
     </div>
@@ -165,10 +164,20 @@
                         <option value="ALARM_CM">ALARM_CM</option>
                     </select> 
                 </label>
-                <label style="margin-left: 50px;">조회기간 : </label>
-                <input type="text" class="input-sm datepicker" id="to_date" name="to_date" style="height: 25px; width: 150px; font-size: 14pt; text-align: center;" placeholder=""/>  ~
-                <input type="text" class="input-sm datepicker" id="from_date" name="from_date" style="height: 25px; width: 150px; font-size: 14pt; text-align: center;" placeholder="2000-01-01"/>
-                <button id="searchbtn" style="margin-left: 50px;">조회</button>
+                
+                <label style="margin-left: 15px;"> 시작일자 : 
+                    <input type="text" class="daySet" id="from_date" 
+                           name="from_date" style="font-size: 14pt; font-weight: 700; text-align: center; width: 150px;" 
+                           placeholder="2024-11-01" />
+                </label>
+                
+                <label style="margin-left: 15px;"> 종료일자 : 
+                    <input type="text" class="daySet" id="to_date" 
+                           name="to_date" style="font-size: 14pt; font-weight: 700; text-align: center; width: 150px;" 
+                           placeholder="2024-11-08" />
+                </label>
+
+                <button id="searchbtn" style="margin-left: 100px;">조회</button>
             </div>
         </fieldset>
 
@@ -178,22 +187,21 @@
         </div>
     </div>
 
-    <script>
-    // 페이지 로드 시 기본 Tabulator 테이블 설정
-    $(document).ready(function() {
-        var table = new Tabulator("#cate_list", {
-            layout: "fitColumns",
-            columns: [
-                {title: "NO", field: "no", width: 150, hozAlign: "center"},
-                {title: "설비명", field: "machine", width: 150, hozAlign: "center"},
-                {title: "PLC ADDR", field: "addr", width: 150, hozAlign: "center"},
-                {title: "경보내용", field: "warndesc", width: 200, hozAlign: "center"},
-                {title: "발생시각", field: "atime", width: 200, hozAlign: "center"},
-                {title: "해제시각", field: "etime", width: 200, hozAlign: "center"}
-            ],
-            placeholder: "검색 결과가 없습니다.", // 기본적으로 빈 테이블로 시작
-            data: [] // 처음엔 빈 데이터로 설정
-        });
+ <script>
+$(document).ready(function() {
+    // Tabulator 초기화 - 처음에 한 번만 실행
+    var table = new Tabulator("#cate_list", {
+        layout: "fitColumns",
+        columns: [
+            {title: "설비명", field: "tagName", width: 150, hozAlign: "center"},
+            {title: "PLC ADDR", field: "tagName", width: 150, hozAlign: "center"},
+            {title: "경보내용", field: "alarmDesc", width: 200, hozAlign: "center"},
+            {title: "발생시간", field: "m01", width: 110},
+            {title: "해제시간", field: "m02", width: 110}
+
+        ],
+        placeholder: "검색 결과가 없습니다.",
+        data: []
     });
 
     // 검색 버튼 클릭 시 getProduct 함수 호출
@@ -202,74 +210,66 @@
     });
 
     function getProduct() {
+        // 서버로 전송할 데이터 콘솔에 출력
+        console.log("Sending data to server:", {
+            alarmgroup: $("#placename").val(),
+            sDate: $("#from_date").val(),
+            eDate: $("#to_date").val()
+        });
+
+        // 기존 데이터 지우기
+        table.clearData();
+
         $.ajax({
             type: "POST",
-            url: "../DB/02_alarm_01.jsp",
+            url: "/transys/alarm/alarmSum/search",
             cache: false,
             dataType: "json",
             data: {
                 'alarmgroup': $("#placename").val(),
-                'sDate': $("#to_date").val(),
-                'eDate': $("#from_date").val()
+                'sDate': $("#from_date").val(),
+                'eDate': $("#to_date").val()
             },
             success: function(rsJson) {
-                if (rsJson && rsJson.status === "ok") {
-                    var rsAr = rsJson.rows;
+                console.log("서버 응답:", rsJson);  // 서버에서 받은 전체 응답을 출력
+                if (rsJson && rsJson.status === "success") {
+                    var rsAr = rsJson.data;
                     var n_cnt = rsAr.length;
 
                     $(".countDATA").text("발생된 경보 수 : " + n_cnt);
 
-                    var table = new Tabulator("#cate_list", {
-                        layout: "fitColumns",
-                        columns: [
-                            {title: "NO", field: "no", width: 150, hozAlign: "center"},
-                            {title: "설비명", field: "machine", width: 150, hozAlign: "center"},
-                            {title: "PLC ADDR", field: "addr", width: 250, hozAlign: "center"},
-                            {title: "경보내용", field: "warndesc", width: 200, hozAlign: "center"},
-                            {title: "발생시각", field: "atime", width: 200, hozAlign: "center"},
-                            {title: "해제시각", field: "etime", width: 200, hozAlign: "center"}
-                        ],
-                        data: rsAr.map(function(item, index) {
-                            return {
-                                no: index + 1,
-                                machine: item.machine,
-                                addr: item.addr,
-                                warndesc: item.warndesc,
-                                atime: item.atime,
-                                etime: item.etime
-                            };
-                        }),
-                        placeholder: "검색 결과가 없습니다."
-                    });
+                    // 서버에서 받은 데이터 콘솔에 출력
+                    console.log("서버에서 받은 데이터:", rsAr);
+
+                    // 데이터를 테이블에 맞게 변환
+                    table.setData(rsAr.map(function(item, index) {
+                        return {
+                            no: index + 1,
+                            tagName: item.tagName, // 설비명
+                            alarmDesc: item.alarmDesc, // 경보 내용
+                           
+                        };
+                    }));
                 } else {
-                    // 데이터가 없을 경우 빈 테이블과 메시지 표시
-                    var table = new Tabulator("#cate_list", {
-                        layout: "fitColumns",
-                        columns: [
-                            {title: "NO", field: "no", width: 50, hozAlign: "center"},
-                            {title: "설비명", field: "machine", width: 150, hozAlign: "center"},
-                            {title: "PLC ADDR", field: "addr", width: 150, hozAlign: "center"},
-                            {title: "경보내용", field: "warndesc", width: 300, hozAlign: "center"},
-                            {title: "발생시각", field: "atime", width: 200, hozAlign: "center"},
-                            {title: "해제시각", field: "etime", width: 200, hozAlign: "center"}
-                        ],
-                        placeholder: "검색 결과가 없습니다.",
-                        data: []
-                    });
                     $(".countDATA").text("발생된 경보 수 : 0");
                 }
             },
+
             error: function(req, status) {
                 if (req.status == 0 || status === "timeout") {
                     alert("네트워크 연결 확인 후 다시 시도해주세요.");
                 } else {
                     alert("처리중 예외가 발생하였습니다. 브라우저를 완전히 종료 후 다시 시도해 보시기 바랍니다.");
                 }
-            },
+            }
         });
     }
-    </script>
+});
+</script>
+
+
 </body>
+
 
 
 
