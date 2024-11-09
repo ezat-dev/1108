@@ -48,7 +48,8 @@
                     FROM ALARMDATA
                     WHERE 1=1
                     AND alarmgroup = #{alarmGroup}
-                    AND time BETWEEN #{sdate} AND #{edate}
+                    AND substr(time,1,4) = #{sdate}
+
                     ORDER BY time
                 ) AS aa
                 WHERE alarmstate != 'Clear'
@@ -62,11 +63,7 @@
  	
  	
  	<select id="getAlarmList" parameterType="alarm" resultType="alarm">
-                SELECT 
-                    tagname, 
-                    alarmdesc, 
-                    SUBSTR(MAX(time), 6, 2) AS mons, 
-                    COUNT(*) AS ccnt
+              SELECT *
                 FROM (
                     SELECT 
                         *,
@@ -74,12 +71,13 @@
                         LEAD(time) OVER (PARTITION BY tagname ORDER BY time) AS lead_alarmtime
                     FROM ALARMDATA
                     WHERE 1=1
-                    AND alarmgroup = #{alarmGroup}
+					AND alarmgroup = #{alarmGroup}
                     AND time BETWEEN #{sdate} AND #{edate}
                     ORDER BY time
                 ) AS aa
-                WHERE alarmstate != 'Clear'
-                GROUP BY tagname, SUBSTR(time, 6, 2)
+                WHERE  1=1
+				and alarmstate = 'Warning'
+				and lead_alarmstate = 'Clear'				
                 ORDER BY time
  	</select>
 </mapper>

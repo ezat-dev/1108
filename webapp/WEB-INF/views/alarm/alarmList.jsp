@@ -97,16 +97,16 @@
 	
 	.countDATA{
 		/* 조회된 데이터 수 */
-		width: 90%;
-		text-align: right;
+		width: 100%;
+
 		color: black;
-		margin: 0 auto;
+		margin-left: 400px;
 		margin-bottom: 3px;
 		font-size:15pt;
 	}
 	
 	#table_file{
-		width: 90%;
+		width: 100%;
 		text-align: center;
 		margin: auto;
 		max-height: 40%;
@@ -134,6 +134,8 @@
 	#table_file{
 		-ms-overflow-style:none;
 		height: 900px;
+		width: 100%;
+		margin-left: 100px;
 	}
 	
 	#table_file::-webkit-scrollbar { display:none; }
@@ -188,23 +190,22 @@
     </div>
 
  <script>
-$(document).ready(function() {
-    // Tabulator 초기화 - 처음에 한 번만 실행
-    var table = new Tabulator("#cate_list", {
-        layout: "fitColumns",
-        columns: [
-            {title: "설비명", field: "tagName", width: 150, hozAlign: "center"},
-            {title: "PLC ADDR", field: "tagName", width: 150, hozAlign: "center"},
-            {title: "경보내용", field: "alarmDesc", width: 200, hozAlign: "center"},
-            {title: "발생시간", field: "m01", width: 110},
-            {title: "해제시간", field: "m02", width: 110}
-
-        ],
-        placeholder: "검색 결과가 없습니다.",
-        data: []
-    });
-
-    // 검색 버튼 클릭 시 getProduct 함수 호출
+ $(document).ready(function() {
+	
+	    var table = new Tabulator("#cate_list", {
+	        layout: "fitColumns",
+	        columns: [
+	            {title: "설비명", field: "tagName", width: 250, hozAlign: "center"},
+	            {title: "PLC ADDR", field: "alarmState", width: 250, hozAlign: "center"},
+	            // {title: "경보LEVEL", field: "alarmlevel", width: 150, hozAlign: "center"},
+	            {title: "경보내용", field: "alarmDesc", width: 400, hozAlign: "center"},
+	            {title: "발생시간", field: "time", width: 250},
+	            {title: "해제시간", field: "lead_alarmtime", width: 250}
+	        ],
+	        placeholder: "검색 결과가 없습니다.",
+	        data: []  
+	    });
+ 
     $("#searchbtn").click(function() {
         getProduct();
     });
@@ -222,13 +223,14 @@ $(document).ready(function() {
 
         $.ajax({
             type: "POST",
-            url: "/transys/alarm/alarmSum/search",
+            url: "/transys/alarm/alarmList/list",
             cache: false,
             dataType: "json",
             data: {
                 'alarmgroup': $("#placename").val(),
                 'sDate': $("#from_date").val(),
                 'eDate': $("#to_date").val()
+                
             },
             success: function(rsJson) {
                 console.log("서버 응답:", rsJson);  // 서버에서 받은 전체 응답을 출력
@@ -243,13 +245,15 @@ $(document).ready(function() {
 
                     // 데이터를 테이블에 맞게 변환
                     table.setData(rsAr.map(function(item, index) {
-                        return {
-                            no: index + 1,
-                            tagName: item.tagName, // 설비명
-                            alarmDesc: item.alarmDesc, // 경보 내용
-                           
-                        };
-                    }));
+                    	 return {
+                             no: index + 1, 
+                             tagName: item.tagName,  
+                             alarmState: item.alarmState || '상태 미정',  
+                             alarmDesc: item.alarmDesc || '경보 내용 없음',  
+                             time: item.time || '시간 미정',  
+                             lead_alarmtime: item.lead_alarmtime || '해제 시간 미정'  
+                         };
+                     }));
                 } else {
                     $(".countDATA").text("발생된 경보 수 : 0");
                 }

@@ -14,6 +14,10 @@ public class Alarm {
 	    
 	    private String sdate;
 	    private String edate;
+	    
+	    private String time;
+	    private String lead_alarmtime;
+
 	   
 	
 	
@@ -68,6 +72,20 @@ public class Alarm {
 	    
 	    
 	    
+		public String getTime() {
+			return time;
+		}
+		public void setTime(String time) {
+			this.time = time;
+		}
+
+		
+		public String getLead_alarmtime() {
+			return lead_alarmtime;
+		}
+		public void setLead_alarmtime(String lead_alarmtime) {
+			this.lead_alarmtime = lead_alarmtime;
+		}
 		public String getSdate() {
 			return sdate;
 		}

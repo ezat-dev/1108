@@ -67,6 +67,7 @@
 		/* 설비명 셀렉트 박스 */
 		font-size: 14pt;
 		text-align: center;
+		width: 180px;
 	}
 	
 	.btn_work{
@@ -95,16 +96,16 @@
 	
 	.countDATA{
 		/* 조회된 데이터 수 */
-		width: 90%;
-		text-align: right;
+		width: 100%;
+
 		color: black;
-		margin: 0 auto;
+		margin-left: 400px;
 		margin-bottom: 3px;
 		font-size:15pt;
 	}
 	
 	#table_file{
-		width: 90%;
+		width: 100%;
 		text-align: center;
 		margin: auto;
 		max-height: 40%;
@@ -132,6 +133,8 @@
 	#table_file{
 		-ms-overflow-style:none;
 		height: 900px;
+		width: 100%;
+		margin-left: 100px;
 	}
 	
 	#table_file::-webkit-scrollbar { display:none; }
@@ -148,7 +151,7 @@
     </div>
 
     <div id="contents">
-        <div style="color: black; font-size: 14px; padding-top: 1%; margin-left: 2.5%; text-align: left;">
+        <div style="color: black; font-size: 14px; padding-top: 1%; margin-left: -10%; text-align: left;">
             <b style="font-size:15pt;">경보</b> / <label style="font-size:15pt;">발생경보조회</label> 
         </div>
         <hr>
@@ -164,24 +167,24 @@
                 </label>
                 
                 <label style="margin-left: 15px;"> 시작일자 : 
-                    <input type="text" class="daySet" id="from_date" 
+                    <input type="text" class="yearSet" id="from_date" 
                            name="from_date" style="font-size: 14pt; font-weight: 700; text-align: center; width: 150px;" 
                            placeholder="2024-11-01" />
                 </label>
                 
-                <label style="margin-left: 15px;"> 종료일자 : 
+  <!--              <label style="margin-left: 15px;"> 종료일자 : 
                     <input type="text" class="daySet" id="to_date" 
                            name="to_date" style="font-size: 14pt; font-weight: 700; text-align: center; width: 150px;" 
                            placeholder="2024-11-08" />
                 </label>
-
+	-->
                 <button id="searchbtn" style="margin-left: 100px;">조회</button>
             </div>
         </fieldset>
 
         <div id="table_file">
             <div class="countDATA">발생된 경보 수 : </div>
-            <div id="cate_list" style="width: 80%;"></div>
+            <div id="cate_list" style="width: 100%;"></div>
         </div>
     </div>
 
@@ -221,8 +224,8 @@ $(document).ready(function() {
         // 서버로 전송할 데이터 콘솔에 출력
         console.log("Sending data to server:", {
             alarmgroup: $("#placename").val(),
-            sDate: $("#from_date").val(),
-            eDate: $("#to_date").val()
+            sDate: $("#from_date").val()
+          //  eDate: $("#to_date").val()
         });
 
         // 기존 데이터 지우기
@@ -235,8 +238,8 @@ $(document).ready(function() {
             dataType: "json",
             data: {
                 'alarmgroup': $("#placename").val(),
-                'sDate': $("#from_date").val(),
-                'eDate': $("#to_date").val()
+                'sDate': $("#from_date").val()
+            //    'eDate': $("#to_date").val()
             },
             success: function(rsJson) {
                 console.log("서버 응답:", rsJson);  // 서버에서 받은 전체 응답을 출력

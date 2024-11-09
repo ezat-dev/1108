@@ -45,7 +45,47 @@ public class AlarmController {
     
     @RequestMapping(value = "/alarm/alarmSum/search", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> workDetailList(
+    public Map<String, Object> alarmSum(
+            @RequestParam String alarmgroup,
+            @RequestParam String sDate
+    ) {
+        System.out.println("Received request:");
+        System.out.println("alarmgroup: " + alarmgroup);
+        System.out.println("sDate: " + sDate);
+
+
+        Map<String, Object> rtnMap = new HashMap<>();
+
+        try {
+            Alarm alarm = new Alarm();
+            alarm.setAlarmGroup(alarmgroup);
+            alarm.setSdate(sDate);
+  
+
+            List<Alarm> alarmList = alarmService.getAlarmSummary(alarm);
+            
+            System.out.println("Product List Size: " + alarmList.size());
+
+            for(Alarm alarmData : alarmList) {
+            	System.out.println(alarmData.getTagName());
+            	System.out.println(alarmData.getTotal());
+            }
+            
+            rtnMap.put("status", "success");
+            rtnMap.put("last_page", 1);
+            rtnMap.put("data", alarmList);
+        } catch (Exception e) {
+            System.out.println("Error occurred: " + e.getMessage());
+            rtnMap.put("status", "error");
+            rtnMap.put("message", e.getMessage());
+        }
+
+        return rtnMap;
+    }
+    
+    @RequestMapping(value = "/alarm/alarmList/list", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> alarmList(
             @RequestParam String alarmgroup,
             @RequestParam String sDate,
             @RequestParam String eDate
@@ -63,7 +103,7 @@ public class AlarmController {
             alarm.setSdate(sDate);
             alarm.setEdate(eDate);
 
-            List<Alarm> alarmList = alarmService.getAlarmSummary(alarm);
+            List<Alarm> alarmList = alarmService.getAlarmList(alarm);
             
             System.out.println("Product List Size: " + alarmList.size());
 
